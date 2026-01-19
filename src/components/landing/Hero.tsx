@@ -107,9 +107,9 @@ export default function Hero() {
         </p>
 
         <div ref={btnGroupRef} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="px-8 py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_40px_rgba(124,58,237,0.7)] group">
+          <a href="https://discord.com/oauth2/authorize?client_id=1430981444431511563" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_40px_rgba(124,58,237,0.7)] group">
             GAMERSボット招待 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
           
           <Link href="/contests" className="px-8 py-4 bg-secondary/20 hover:bg-secondary/40 text-white font-bold rounded-lg transition-all flex items-center gap-2 border border-white/10 backdrop-blur-sm">
             <Trophy size={20} />

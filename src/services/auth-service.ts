@@ -1,0 +1,70 @@
+import { api, setTokens, clearTokens } from '@/lib/api-client';
+import { 
+  LoginRequest, 
+  CreateUserRequest, 
+  ApiResponse, 
+  UserResponse, 
+  LogoutRequest 
+} from '@/types/api';
+import Cookies from 'js-cookie';
+
+export const authService = {
+  async login(credentials: LoginRequest) {
+    const response = await api.post<ApiResponse<{ 
+      access_token: string; 
+      refresh_token: string;
+      user?: UserResponse; // Assuming backend returns user info on login too, or we fetch it separately
+    }>>('/auth/login', credentials, { requiresAuth: false });
+    
+    if (response.data) {
+      setTokens(response.data.access_token, response.data.refresh_token);
+    }
+    return response;
+  },
+
+  async register(data: CreateUserRequest) {
+    return api.post<ApiResponse<{ user_id: number }>>('/users', data, { requiresAuth: false });
+  },
+
+  async logout() {
+    const accessToken = Cookies.get('access_token');
+    const refreshToken = Cookies.get('refresh_token');
+
+    if (accessToken && refreshToken) {
+      try {
+        await api.post<void>('/auth/logout', { 
+          access_token: accessToken, 
+          refresh_token: refreshToken 
+        } as LogoutRequest);
+      } catch (error) {
+        console.error('Logout failed', error);
+      }
+    }
+    clearTokens();
+  },
+
+  loginWithDiscord() {
+    // Redirect to backend endpoint which handles the OAuth2 handshake start
+    // Or simpler: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/discord/login`;
+    // But since the Swagger says it returns 302, we can just navigate there.
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+    window.location.href = `${BASE_URL}/oauth2/discord/login`;
+  },
+
+  async handleDiscordCallback(code: string, state?: string) {
+    // The swagger says GET /api/oauth2/discord/callback
+    // It returns data. We probably need to store tokens from it.
+    const response = await api.get<ApiResponse<{
+      access_token: string;
+      refresh_token: string;
+    }>>('/oauth2/discord/callback', { 
+      params: { code, state },
+      requiresAuth: false 
+    });
+
+    if (response.data) {
+       setTokens(response.data.access_token, response.data.refresh_token);
+    }
+    return response;
+  }
+};

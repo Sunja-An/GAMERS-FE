@@ -44,12 +44,12 @@ export default function CTA() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button className="group relative px-12 py-6 bg-white text-black font-black text-xl md:text-2xl rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)] ring-4 ring-transparent hover:ring-primary/20">
+            <a href="https://discord.com/oauth2/authorize?client_id=1430981444431511563" target="_blank" rel="noopener noreferrer" className="group relative px-12 py-6 bg-white text-black font-black text-xl md:text-2xl rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)] ring-4 ring-transparent hover:ring-primary/20">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                 <span className="relative flex items-center gap-3">
                     無料で始める <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </span>
-            </button>
+            </a>
         </div>
         
         <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
