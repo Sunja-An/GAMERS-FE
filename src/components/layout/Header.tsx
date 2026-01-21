@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Search, Bell, Menu, LogOut, User, Settings, FileText, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkAuth } from "@/lib/auth";
+import { authService } from "@/services/auth-service";
 import { cn } from "@/lib/utils";
 import { Koulen } from "next/font/google";
 
@@ -19,13 +19,25 @@ export default function Header() {
   const router = useRouter();
   const headerRef = useRef<HTMLElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Demo State
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // GSAP: Animate bottom border on scroll
+  useEffect(() => {
+    console.log("[Header] Checking session...");
+    const verifySession = async () => {
+      try {
+        await authService.getMe();
+        console.log("[Header] Session valid");
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.log("[Header] Session invalid");
+        setIsLoggedIn(false);
+      }
+    };
+    verifySession();
+  }, []);
+
   useGSAP(() => {
-    // Initial state: border is there but transparent or width 0? 
-    // Requirement: "neon-cyan color border that animates in"
     
     gsap.fromTo(headerRef.current, 
       { borderBottomColor: "transparent", borderBottomWidth: "1px" }, 
@@ -42,7 +54,6 @@ export default function Header() {
     );
   }, { scope: headerRef });
 
-  // Toggle dropdown animation
   useGSAP(() => {
     if (isDropdownOpen) {
         gsap.fromTo(dropdownRef.current,
@@ -63,14 +74,12 @@ export default function Header() {
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         
-        {/* LOGO */}
         <div className="flex items-center gap-4">
             <Link href="/" className={cn("text-3xl tracking-wider text-white hover:opacity-80 transition-opacity", koulen.className)}>
                 GAMERS
             </Link>
         </div>
 
-        {/* NAVIGATION */}
         <nav className="hidden md:flex items-center gap-6 mx-6">
             <Link href="/contests" className="text-sm font-bold text-muted-foreground hover:text-white transition-colors flex items-center gap-2">
                 <Trophy size={16} />
@@ -78,7 +87,6 @@ export default function Header() {
             </Link>
         </nav>
 
-        {/* SEARCH BAR */}
         <div className="hidden md:flex items-center flex-1 max-w-sm mx-8 relative group transition-all duration-300 focus-within:max-w-md focus-within:shadow-[0_0_20px_rgba(34,211,238,0.3)] rounded-full">
             <Search className="absolute left-3 text-muted-foreground w-4 h-4 group-focus-within:text-primary transition-colors" />
             <input 
@@ -89,7 +97,6 @@ export default function Header() {
             />
         </div>
 
-        {/* RIGHT ACTIONS */}
         <div className="flex items-center gap-4">
             {isLoggedIn ? (
                 <>
@@ -108,7 +115,6 @@ export default function Header() {
                             </div>
                         </button>
 
-                        {/* Dropdown Menu */}
                         <div 
                             ref={dropdownRef}
                             className="absolute right-0 top-full mt-2 w-56 bg-[#0f172a] border border-cyan-500/30 rounded-xl shadow-2xl p-2 hidden origin-top-right overflow-hidden"
@@ -135,7 +141,6 @@ export default function Header() {
                 </Link>
             )}
             
-            {/* Mobile Menu Trigger (Visual Only) */}
             <button className="md:hidden p-2 text-white">
                 <Menu />
             </button>

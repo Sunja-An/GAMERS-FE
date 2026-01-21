@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description: "Level up your gaming journey with GAMERS.",
 };
 
+import { ToastProvider } from "@/context/ToastContext";
+
+import Providers from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +25,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(inter.className, "antialiased bg-background text-foreground overflow-x-hidden")}>
         <SmoothScroll>
-          {children}
+          <Providers>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </Providers>
         </SmoothScroll>
       </body>
     </html>

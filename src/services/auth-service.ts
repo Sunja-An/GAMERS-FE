@@ -13,7 +13,7 @@ export const authService = {
     const response = await api.post<ApiResponse<{ 
       access_token: string; 
       refresh_token: string;
-      user?: UserResponse; // Assuming backend returns user info on login too, or we fetch it separately
+      user?: UserResponse;
     }>>('/auth/login', credentials, { requiresAuth: false });
     
     if (response.data) {
@@ -44,16 +44,11 @@ export const authService = {
   },
 
   loginWithDiscord() {
-    // Redirect to backend endpoint which handles the OAuth2 handshake start
-    // Or simpler: window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/discord/login`;
-    // But since the Swagger says it returns 302, we can just navigate there.
     const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
     window.location.href = `${BASE_URL}/oauth2/discord/login`;
   },
 
   async handleDiscordCallback(code: string, state?: string) {
-    // The swagger says GET /api/oauth2/discord/callback
-    // It returns data. We probably need to store tokens from it.
     const response = await api.get<ApiResponse<{
       access_token: string;
       refresh_token: string;
@@ -66,5 +61,24 @@ export const authService = {
        setTokens(response.data.access_token, response.data.refresh_token);
     }
     return response;
+  },
+
+  async getMe() {
+    const response = await fetch('/api/auth/me', { credentials: 'include' });
+    
+    if (!response.ok) {
+        let errorMessage = 'Authentication processing failed';
+        try {
+            const errorBody = await response.json();
+            errorMessage = errorBody.message || errorMessage;
+        } catch (e) {
+            
+        }
+        const error: any = new Error(errorMessage);
+        error.status = response.status;
+        throw error;
+    }
+    
+    return response.json();
   }
 };
