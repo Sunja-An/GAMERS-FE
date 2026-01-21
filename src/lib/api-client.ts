@@ -1,7 +1,6 @@
-import { ApiResponse } from '@/types/api';
 import Cookies from 'js-cookie';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const BASE_URL = '/api/proxy';
 
 export class ApiError extends Error {
   status: number;
@@ -21,11 +20,7 @@ interface FetchOptions extends RequestInit {
   requiresAuth?: boolean;
 }
 
-// Helper to get tokens
-const getAccessToken = () => Cookies.get('access_token');
-const getRefreshToken = () => Cookies.get('refresh_token');
-
-// Helper to set tokens
+// Keep these for compatibility with auth-service, but they primarily affect client-side logic
 export const setTokens = (accessToken: string, refreshToken: string) => {
   Cookies.set('access_token', accessToken);
   Cookies.set('refresh_token', refreshToken);
@@ -36,12 +31,13 @@ export const clearTokens = () => {
   Cookies.remove('refresh_token');
 };
 
-async function apiClient<T>(
+export async function apiClient<T>(
   endpoint: string,
   method: RequestMethod = 'GET',
   { params, requiresAuth = true, headers, ...customConfig }: FetchOptions = {}
 ): Promise<T> {
-  const url = new URL(`${BASE_URL}${endpoint}`);
+  const safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = new URL(`${BASE_URL}${safeEndpoint}`, window.location.origin);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -60,61 +56,30 @@ async function apiClient<T>(
     ...customConfig,
   };
 
-  if (requiresAuth) {
-    const token = getAccessToken();
-    if (token) {
-      (config.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    }
-  }
-
+  // Authorization header is injected by Middleware (src/middleware.ts) based on HttpOnly cookies.
+  
   let response = await fetch(url.toString(), config);
 
-  // Handle 401 Unauthorized (Refresh Token Logic)
+  // Handle 401 Unauthorized (Refresh Token Logic via Server Route)
   if (response.status === 401 && requiresAuth) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken) {
       try {
-        // Try to refresh the token
-        const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
+        const refreshResponse = await fetch('/api/auth/refresh', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ refresh_token: refreshToken }),
         });
 
         if (refreshResponse.ok) {
-          const data = await refreshResponse.json();
-          // Assuming the structure is standard ApiResponse with data containing new tokens
-          // Adjust based on actual refresh response structure if different
-          const newAccessToken = data.data?.access_token; 
-          // If the backend returns a new refresh token, update it too
-          const newRefreshToken = data.data?.refresh_token || refreshToken;
-
-          if (newAccessToken) {
-            setTokens(newAccessToken, newRefreshToken);
-             // Retry the original request with new token
-            (config.headers as Record<string, string>)['Authorization'] = `Bearer ${newAccessToken}`;
-            response = await fetch(url.toString(), config);
-          } else {
-             clearTokens();
-             window.location.href = '/login'; // Redirect to login
-          }
+           // Token refreshed (cookies updated by server). Retry request.
+           response = await fetch(url.toString(), config);
         } else {
-          clearTokens();
+           clearTokens();
            window.location.href = '/login';
         }
       } catch (error) {
         clearTokens();
         window.location.href = '/login';
       }
-    } else {
-       // No refresh token available
-       // Optional: Redirect to login or just let it fail
-    }
   }
 
-  // Handle generic errors
   if (!response.ok) {
     let errorMessage = 'Something went wrong';
     let errorData = null;
@@ -128,21 +93,11 @@ async function apiClient<T>(
     throw new ApiError(response.status, errorMessage, errorData);
   }
 
-  // Handle 204 No Content
   if (response.status === 204) {
     return {} as T;
   }
 
-  const responseBody = await response.json();
-  
-  // Unwrap generic Response wrapper if present, or return raw
-  // The Swagger defines many responses as `ApiResponse` wrapper.
-  // We can choose to return the full wrapper or just the data.
-  // For convenience, let's return the full wrapper for now so the caller checks .status if needed,
-  // or we can unwrap here. 
-  // Given the requirement for generic error handling, unwrapping `data` IF strict structure exists is good,
-  // but let's return the body as T for maximum flexibility unless specific standard prevails.
-  return responseBody as T;
+  return await response.json() as T;
 }
 
 export const api = {
