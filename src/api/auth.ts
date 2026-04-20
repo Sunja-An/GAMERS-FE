@@ -23,6 +23,7 @@ export const authApi = {
     
   getMe: () => 
     apiClient.get<User>('/api/users/my'),
+
     
   getDiscordLoginUrl: () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.gamers.io.kr';
@@ -30,9 +31,4 @@ export const authApi = {
     const normalizedApiUrl = apiUrl.startsWith('http') ? apiUrl : `https://${apiUrl}`;
     return `${normalizedApiUrl}/api/oauth2/discord/login`;
   },
-
-  discordCallback: (code: string, state?: string) =>
-    apiClient.get('/api/auth/callback/discord', {
-      params: { code, state },
-    }),
 };

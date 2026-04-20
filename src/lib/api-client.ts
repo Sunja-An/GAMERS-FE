@@ -44,6 +44,7 @@ export async function request<T>(
 
   const config = {
     ...rest,
+    credentials: 'include' as RequestCredentials,
     headers: {
       ...defaultHeaders,
       ...headers,

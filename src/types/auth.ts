@@ -9,7 +9,20 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   username: string;
+  tag: string;
+  bio?: string;
   avatar?: string;
+}
+
+export interface UpdateProfileRequest {
+  username?: string;
+  tag?: string;
+  bio?: string;
+  avatar?: string;
+}
+
+export interface ChangePasswordRequest {
+  password: string;
 }
 
 export interface LogoutRequest {
@@ -27,29 +40,32 @@ export interface AuthTokens {
 }
 
 export interface User {
-  user_id: number;
+  id: number;
   email: string;
   username: string;
-  role: UserRole;
-  avatar?: string;
+  tag: string;
   bio?: string;
-  tag?: string;
-  region?: string;
-  riot_name?: string;
-  riot_tag?: string;
-  current_tier?: number;
-  current_tier_patched?: string;
-  peak_tier?: number;
-  peak_tier_patched?: string;
-  elo?: number;
-  ranking_in_tier?: number;
-  profile_key?: string;
-  valorant_updated_at?: string;
-  created_at: string;
-  modified_at: string;
+  avatar?: string;
+  profileKey?: string;
+  createdAt: string;
+  modifiedAt: string;
+  role?: UserRole; // Keep for legacy/admin support if needed
+
+  // Valorant-related fields
+  riotName?: string | null;
+  riotTag?: string | null;
+  region?: string | null;
+  currentTier?: number | null;
+  currentTierPatched?: string | null;
+  elo?: number | null;
+  rankingInTier?: number | null;
+  peakTier?: number | null;
+  peakTierPatched?: string | null;
+  valorantUpdatedAt?: string | null;
 }
 
 export interface AuthResponseData {
   user: User;
   tokens: AuthTokens;
 }
+

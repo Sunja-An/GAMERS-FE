@@ -1,7 +1,8 @@
 import { apiClient } from '@/lib/api-client';
 import { 
   CreateSessionResponse, 
-  GetSessionResponse 
+  GetSessionResponse,
+  InviteResponse 
 } from '@/types/lol';
 
 export const lolSessionApi = {
@@ -33,5 +34,12 @@ export const lolSessionApi = {
   getWsUrl: (sessionId: string, token: string) => {
     const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || 'wss://api.gamers.io.kr';
     return `${baseUrl}/api/lol/sessions/${sessionId}/ws?token=${token}`;
+  },
+
+  /**
+   * Get session info from an invite code
+   */
+  getInviteInfo: (code: string) => {
+    return apiClient.get<InviteResponse>(`/api/lol/invite/${code}`);
   },
 };

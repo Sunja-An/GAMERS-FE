@@ -1,3 +1,5 @@
+'use client';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -67,29 +69,6 @@ export function useUser() {
     enabled: !!Cookies.get('access_token') || !!Cookies.get('refresh_token'),
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
-
-export function useDiscordCallback() {
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
-  return useMutation({
-    mutationFn: ({ code, state }: { code: string; state?: string }) => 
-      authApi.discordCallback(code, state),
-    onSuccess: (data: any) => {
-      // Backend returns AuthResponseData containing user and tokens
-      if (data?.tokens) {
-        Cookies.set('access_token', data.tokens.access_token, { expires: 1 }); // 1 day
-        Cookies.set('refresh_token', data.tokens.refresh_token, { expires: 7 }); // 7 days
-      }
-      
-      // Invalidate user query to fetch latest user info
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      
-      // Redirect to home
-      router.push('/');
-    },
   });
 }
 

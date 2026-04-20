@@ -747,21 +747,46 @@
         "signup_link": "회원가입"
       }
     },
+    "error": {
+      "invalid_state": "인증 상태가 올바르지 않거나 만료되었습니다.",
+      "missing_code": "인증 코드가 누락되었습니다.",
+      "access_denied": "Discord 인증이 거부되었습니다.",
+      "OA001": "Discord 유저 정보를 가져오는데 실패했습니다.",
+      "OA002": "유저를 찾을 수 없습니다.",
+      "OA003": "토큰 교환에 실패했습니다.",
+      "OA004": "Discord 계정 연동이 필요합니다.",
+      "ST001": "유효하지 않은 요청 상태입니다.",
+      "ST002": "인증 요청이 만료되었습니다.",
+      "unknown": "알 수 없는 인증 오류가 발생했습니다."
+    },
     "signup": {
       "title": "GAMERS에\n합류하세요",
       "subtitle": "게이머로서의 첫 기억을 시작하세요",
       "fields": {
         "username_label": "닉네임",
         "username_placeholder": "GamerPro",
+        "tag_label": "태그",
+        "tag_placeholder": "KR1",
+        "bio_label": "자기소개 (선택)",
+        "bio_placeholder": "안녕하세요! 게이머입니다.",
         "email_label": "이메일 주소",
         "email_placeholder": "name@example.com",
         "password_label": "비밀번호",
         "password_placeholder": "••••••••"
       },
       "validation": {
-        "username_min": "닉네임은 최소 2자 이상이어야 합니다.",
+        "username_empty": "닉네임을 입력해주세요.",
+        "username_min": "닉네임은 최소 1자 이상이어야 합니다.",
+        "username_max": "닉네임은 최대 16자까지 가능합니다.",
+        "username_format": "닉네임은 영문과 숫자만 가능합니다.",
+        "tag_empty": "태그를 입력해주세요.",
+        "tag_max": "태그는 최대 5자까지 가능합니다.",
+        "tag_format": "태그는 영문과 숫자만 가능합니다.",
         "email_invalid": "올바른 이메일 형식이 아닙니다.",
-        "password_min": "비밀번호는 최소 8자 이상이어야 합니다."
+        "email_max": "이메일은 최대 256자까지 가능합니다.",
+        "password_min": "비밀번호는 최소 8자 이상이어야 합니다.",
+        "password_complexity": "비밀번호는 대문자, 소문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.",
+        "bio_max": "자기소개는 최대 256자까지 가능합니다."
       },
       "error_failed": "회원가입에 실패했습니다.",
       "submit_btn": "회원가입",
@@ -925,6 +950,43 @@
         "title": "[LoL] 자랭 & 격전 함께하실 분들!",
         "tags": "#플래티넘 #즐겜 #마이크필수"
       }
+    },
+    "mypage": {
+      "edit_profile": "프로필 편집",
+      "edit_profile_title": "프로필 수정",
+      "bio_default": "안녕하세요! 게이머입니다.",
+      "stats": {
+        "contests": "참가 대회",
+        "win_rate": "총 승률",
+        "trophies": "획득 트로피"
+      },
+      "settings": {
+        "title": "계정 설정",
+        "password_change": {
+          "title": "비밀번호 변경",
+          "current_password": "현재 비밀번호",
+          "new_password": "새 비밀번호",
+          "confirm_password": "새 비밀번호 확인",
+          "success": "비밀번호가 성공적으로 변경되었습니다."
+        },
+        "account_deletion": {
+          "title": "계정 탈퇴",
+          "description": "탈퇴 시 모든 정보가 삭제되며 복구할 수 없습니다.",
+          "button": "탈퇴하기",
+          "confirm": "정말로 탈퇴하시겠습니까?"
+        }
+      }
     }
+  },
+  "onboarding": {
+    "title": "GAMERS에 오신 것을 환영합니다!",
+    "subtitle": "게이머로서의 새로운 여정이 시작되었습니다.",
+    "description": "이제 당신만의 대회를 만들거나, 전 세계 게이머들과 함께 경쟁할 준비가 되었습니다.",
+    "features": {
+      "profile": "프로필 설정하기",
+      "contest": "대회 찾아보기",
+      "community": "커뮤니티 활동하기"
+    },
+    "cta": "시작하기"
   }
 }

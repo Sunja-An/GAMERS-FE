@@ -11,9 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLogin, useDiscordLogin } from '@/hooks/use-auth';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const oauthError = searchParams.get('error');
   const { mutate: login, isPending, error } = useLogin();
 
   const loginSchema = React.useMemo(() => z.object({
@@ -107,6 +110,12 @@ export function LoginForm() {
 
         {error && (
           <p className="text-[11px] text-red-500 ml-1">{(error as any).message || t('auth.login.error_failed')}</p>
+        )}
+        
+        {oauthError && (
+          <p className="text-[11px] text-red-500 ml-1">
+            {t(`auth.error.${oauthError}`, { defaultValue: t('auth.error.unknown') })}
+          </p>
         )}
 
         <Button 

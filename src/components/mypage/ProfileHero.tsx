@@ -1,12 +1,28 @@
 'use client';
 
+import React from 'react';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Settings, UserCircle, Trophy, Target, PlayCircle } from 'lucide-react';
+import { Settings, UserCircle, Trophy, Target, PlayCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useUser } from '@/hooks/use-auth';
+import { EditProfileModal } from './EditProfileModal';
 
 export function ProfileHero() {
   const { t } = useTranslation();
+  const { data: user, isLoading } = useUser();
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="pt-32 pb-12 flex justify-center items-center">
+        <Loader2 className="w-8 h-8 animate-spin text-neon-mint" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <section className="relative overflow-hidden pt-24 pb-12">
@@ -18,9 +34,17 @@ export function ProfileHero() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 flex-1">
           {/* Avatar Area */}
           <div className="relative group">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-neon-mint to-emerald-600 flex items-center justify-center text-4xl font-black text-deep-black shadow-[0_0_40px_rgba(110,231,183,0.2)]">
-              SP
-            </div>
+            {user.avatar ? (
+              <img 
+                src={user.avatar} 
+                alt={user.username}
+                className="w-32 h-32 rounded-full object-cover border-2 border-neon-mint/30 shadow-[0_0_40px_rgba(110,231,183,0.2)]"
+              />
+            ) : (
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-neon-mint to-emerald-600 flex items-center justify-center text-4xl font-black text-deep-black shadow-[0_0_40px_rgba(110,231,183,0.2)]">
+                {user.username.substring(0, 2).toUpperCase()}
+              </div>
+            )}
             <div className="absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-[#141418] border-2 border-neon-mint/30 flex items-center justify-center text-neon-mint">
                <UserCircle className="w-6 h-6" />
             </div>
@@ -30,30 +54,37 @@ export function ProfileHero() {
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-black text-[#EEEEF0] tracking-tight">StarPlayer_KR</h1>
-                <span className="text-lg font-bold text-[#7A7A85]">#KR01</span>
-                <div className="px-2 py-0.5 rounded bg-neon-mint/10 border border-neon-mint/20">
-                  <span className="text-[10px] font-black text-neon-mint uppercase tracking-widest">{t('mypage.member_tag', 'MEMBER')}</span>
-                </div>
+                <h1 className="text-3xl font-black text-[#EEEEF0] tracking-tight">{user.username}</h1>
+                <span className="text-lg font-bold text-[#7A7A85]">#{user.tag}</span>
+                {user.riotName && (
+                  <div className="px-2 py-0.5 rounded bg-neon-mint/10 border border-neon-mint/20">
+                    <span className="text-[10px] font-black text-neon-mint uppercase tracking-widest">
+                      {user.currentTierPatched || 'VALORANT'}
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-[#BBBBCB] font-medium leading-relaxed max-w-xl">
-                {t('mypage.bio_default')}
+                {user.bio || t('mypage.bio_default', '안녕하세요!')}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <Button 
+                onClick={() => setIsEditModalOpen(true)}
                 variant="riot" 
                 className="bg-[#1C1C21] hover:bg-[#242428] border border-white/5 text-[13px] font-bold px-6 h-10 flex items-center gap-2"
               >
                 {t('mypage.edit_profile')}
               </Button>
-              <Button 
-                variant="riot" 
-                className="bg-[#1C1C21] hover:bg-[#242428] border border-white/10 p-2.5 h-10 w-10 flex items-center justify-center"
-              >
-                <Settings className="w-4 h-4 text-[#7A7A85]" />
-              </Button>
+              <Link href="/mypage/settings">
+                <Button 
+                  variant="riot" 
+                  className="bg-[#1C1C21] hover:bg-[#242428] border border-white/10 p-2.5 h-10 w-10 flex items-center justify-center"
+                >
+                  <Settings className="w-4 h-4 text-[#7A7A85]" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -61,24 +92,25 @@ export function ProfileHero() {
         {/* Right Side: Quick Stats */}
         <div className="grid grid-cols-3 gap-3 md:w-[480px]">
           <StatCard 
-            label={t('mypage.stats.contests')} 
-            value="14" 
+            label={t('mypage.stats.contests', '대회')} 
+            value="0" 
             icon={<Target className="w-5 h-5 text-[#7A7A85]" />} 
           />
           <StatCard 
-            label={t('mypage.stats.win_rate')} 
-            value="68%" 
+            label={t('mypage.stats.win_rate', '승률')} 
+            value="0%" 
             icon={<PlayCircle className="w-5 h-5 text-[#7A7A85]" />} 
             highlight
           />
           <StatCard 
-            label={t('mypage.stats.trophies')} 
-            value="3" 
+            label={t('mypage.stats.trophies', '트로피')} 
+            value="0" 
             icon={<Trophy className="w-5 h-5 text-[#7A7A85]" />} 
           />
-
         </div>
       </div>
+
+      <EditProfileModal user={user} isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
     </section>
   );
 }
@@ -103,3 +135,4 @@ function StatCard({ label, value, icon, highlight = false }: { label: string, va
     </motion.div>
   );
 }
+
