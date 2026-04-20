@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Eraser, UserSearch, CheckCircle2 } from 'lucide-react';
+import { Search, Eraser, UserSearch, CheckCircle2, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface NicknameParsingPanelProps {
   onParse: (nicknames: string[]) => void;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function NicknameParsingPanel({ onParse, className }: NicknameParsingPanelProps) {
+export function NicknameParsingPanel({ onParse, isLoading, className }: NicknameParsingPanelProps) {
   const { t } = useTranslation();
   const [inputText, setInputText] = useState('');
   const [parsedList, setParsedList] = useState<string[]>([]);
@@ -81,28 +82,35 @@ export function NicknameParsingPanel({ onParse, className }: NicknameParsingPane
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder={t('playground.team_distribution.parsing.placeholder')}
-          className="w-full h-40 bg-transparent rounded-2xl p-6 text-[15px] font-medium text-[#EEEEF0] placeholder:text-[#3A3A45] focus:outline-none transition-all resize-none leading-relaxed"
+          disabled={isLoading}
+          className="w-full h-40 bg-transparent rounded-2xl p-6 text-[15px] font-medium text-[#EEEEF0] placeholder:text-[#3A3A45] focus:outline-none transition-all resize-none leading-relaxed disabled:opacity-50"
         />
         
         <div className="absolute bottom-4 right-4 flex items-center gap-3">
           <button
             onClick={handleClear}
-            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-white/5 text-[#5A5A65] hover:text-[#EEEEF0] hover:bg-white/10 transition-all active:scale-95"
+            disabled={isLoading}
+            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-white/5 text-[#5A5A65] hover:text-[#EEEEF0] hover:bg-white/10 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             title={t('playground.team_distribution.parsing.clear_button')}
           >
             <Eraser className="h-5 w-5" />
           </button>
           <button
             onClick={handleParse}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isLoading}
             className={cn(
-              "flex items-center gap-3 px-8 h-12 rounded-2xl text-[14px] font-black transition-all active:scale-95 shadow-lg",
+              "flex items-center gap-3 px-8 h-12 rounded-2xl text-[14px] font-black transition-all active:scale-95 shadow-lg min-w-[140px] justify-center",
               isSuccess 
                 ? "bg-neon-mint text-black" 
                 : "bg-[#1A1A20] text-[#EEEEF0] border border-white/5 hover:bg-[#25252D] disabled:opacity-30 disabled:cursor-not-allowed"
             )}
           >
-            {isSuccess ? (
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>{t('common.loading')}</span>
+              </>
+            ) : isSuccess ? (
               <>
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{t('playground.team_distribution.parsing.success')}</span>

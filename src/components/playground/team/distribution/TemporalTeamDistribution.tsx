@@ -78,27 +78,55 @@ export function TemporalTeamDistribution() {
   const handleParseNicknames = useCallback(async (nicknames: string[]) => {
     setIsLookupLoading(true);
     
-    // Set names first
-    setParticipants(prev => {
-      const newParticipants = [...prev];
-      nicknames.forEach((name, i) => {
-        if (i < 10) {
-          newParticipants[i] = { ...newParticipants[i], name };
+    try {
+      // 1. Prepare all lookups in parallel
+      const lookupPromises = nicknames.slice(0, 10).map(async (name) => {
+        // Logic for Riot ID: if no #, try #KR1 as default for Korean users
+        const riotId = name.includes('#') ? name : `${name}#KR1`;
+        const [username, tag] = riotId.split('#');
+        
+        try {
+          const data = await lolApi.summonerLookup({ name: username, tag });
+          return { name, data };
+        } catch (error) {
+          console.error(`Failed to lookup summoner ${name}:`, error);
+          return { name, data: null };
         }
       });
-      for (let i = nicknames.length; i < 10; i++) {
-        newParticipants[i] = { id: `${i}`, name: '', role: null, tier: null };
-      }
-      return newParticipants;
-    });
 
-    // Lookup ranks for Name#Tag formats
-    await Promise.all(
-      nicknames.slice(0, 10).map((name, i) => handleLookupSummoner(name, i))
-    );
-    
-    setIsLookupLoading(false);
-  }, [handleLookupSummoner]);
+      // 2. Wait for all lookups to complete
+      const results = await Promise.all(lookupPromises);
+
+      // 3. Apply all results at once to the state
+      setParticipants(prev => {
+        const next = [...prev];
+        results.forEach((result, i) => {
+          if (i < 10) {
+            next[i] = {
+              id: `${i}`,
+              name: result.name,
+              role: next[i]?.role || null, // Preserve role if already set
+              tier: result.data?.tier?.toUpperCase() as Tier || null,
+              rankName: result.data?.rank || undefined,
+              profileIconId: result.data?.profile_icon_id || undefined,
+              isSearching: false
+            };
+          }
+        });
+        
+        // Clear remaining slots if any
+        for (let i = results.length; i < 10; i++) {
+          next[i] = { id: `${i}`, name: '', role: null, tier: null };
+        }
+        
+        return next;
+      });
+    } catch (error) {
+      console.error('Error during batch nickname parsing:', error);
+    } finally {
+      setIsLookupLoading(false);
+    }
+  }, []);
 
   const handleUpdateParticipant = useCallback((index: number, data: Partial<Participant>) => {
     setParticipants(prev => {
@@ -183,7 +211,7 @@ export function TemporalTeamDistribution() {
             transition={{ duration: 0.4 }}
             className="flex flex-col gap-12"
           >
-            <NicknameParsingPanel onParse={handleParseNicknames} />
+            <NicknameParsingPanel onParse={handleParseNicknames} isLoading={isLookupLoading} />
 
             <div className="flex flex-col gap-10">
               <div className="flex items-center justify-between">
