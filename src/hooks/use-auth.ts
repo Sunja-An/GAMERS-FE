@@ -66,7 +66,14 @@ export function useUser() {
   return useQuery({
     queryKey: ['user'],
     queryFn: () => authApi.getMe(),
-    enabled: !!Cookies.get('access_token') || !!Cookies.get('refresh_token'),
+    // Enabled if we have tokens (JS visible) OR if we have the 'logged_in' signal
+    // This allows it to work when tokens are HttpOnly
+    enabled: typeof window !== 'undefined' && (
+      !!Cookies.get('access_token') || 
+      !!Cookies.get('refresh_token') || 
+      !!Cookies.get('logged_in') ||
+      !!Cookies.get('is_new_user')
+    ),
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

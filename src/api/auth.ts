@@ -24,6 +24,8 @@ export const authApi = {
   getMe: () => 
     apiClient.get<User>('/api/users/my'),
 
+  discordCallback: (code: string, state: string) =>
+    apiClient.get<{ user: User; tokens: AuthTokens }>(`/api/oauth2/discord/callback?code=${code}&state=${state}`),
     
   getDiscordLoginUrl: () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.gamers.io.kr';
