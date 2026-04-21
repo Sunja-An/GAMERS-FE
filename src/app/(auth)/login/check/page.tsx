@@ -1,18 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '@/api/auth';
 
-/**
- * LoginCheckPage serves as a synonym for LoginSuccessPage.
- * It also handles the edge case where the frontend might receive the 
- * Discord OAuth2 code directly (if the backend is configured that way).
- */
-export default function LoginCheckPage() {
+function LoginCheckContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
@@ -108,3 +103,21 @@ export default function LoginCheckPage() {
     </div>
   );
 }
+
+/**
+ * LoginCheckPage serves as a synonym for LoginSuccessPage.
+ * It also handles the edge case where the frontend might receive the 
+ * Discord OAuth2 code directly (if the backend is configured that way).
+ */
+export default function LoginCheckPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0C0C0F] flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-[#6EE7B7] animate-spin" />
+      </div>
+    }>
+      <LoginCheckContent />
+    </Suspense>
+  );
+}
+
